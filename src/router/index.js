@@ -3,8 +3,9 @@ import HomeView from '../views/HomeView.vue'
 import DashboardVue from '@/views/Dashboard.vue'
 import ServiceViewVue from '@/views/Services/Index.vue'
 import CreateServices from '@/views/Services/create.vue'
-import { useAuthStore } from '@/stores/authStore'
 import LoginView from '@/views/LoginView.vue'
+import TicketView from '@/views/TicketView.vue'
+import UserView from '@/views/UserView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -14,9 +15,15 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/login',
-      name: 'login',
-      meta: { authPage: true },
+      path: '/ticket',
+      name: 'ticket',
+      component: TicketView,
+      meta: { layout: 'auth' },
+    },
+    {
+      path: '/signin',
+      name: 'signin',
+      meta: { layout: 'auth' },
       component: LoginView,
     },
     {
@@ -26,10 +33,10 @@ const router = createRouter({
       component: DashboardVue,
     },
     {
-      path: '/service',
-      name: 'service',
-      // meta: { requiresAuth: true },
-      component: ServiceViewVue,
+      path: '/user',
+      name: 'user',
+      meta: { requiresAuth: true },
+      component: UserView,
     },
     {
       path: '/create/service',
@@ -40,14 +47,33 @@ const router = createRouter({
   ],
 })
 
+// Navigation guards: redirect authenticated users away from auth pages
+import { useAuthStore } from '../stores/authStore'
+
+// router.beforeEach((to, from, next) => {
+//   const authStore = useAuthStore()
+
+//   if (to.meta.requiresAuth && !authStore.token) {
+//     next('/signin') // Redirect to login if not authenticated
+//   } else {
+//     next()
+//   }
+// })
+
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
+  // Case 1: Route requires auth but user has no token
   if (to.meta.requiresAuth && !authStore.token) {
-    next('/login') // Redirect to login if not authenticated
-  } else {
+    next({ name: 'signin' })
+  } 
+  // Case 2: User is logged in but tries to navigate manually back to signin
+  else if (to.name === 'signin' && authStore.token) {
+    next({ name: 'dashboard' }) 
+  } 
+  // Case 3: Standard safe fallthrough
+  else {
     next()
   }
 })
-
 export default router

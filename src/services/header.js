@@ -1,8 +1,9 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/authStore'
+import router from '@/router' // Import your Vue Router instance directly
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000/api/',
+  baseURL: 'http://localhost:3000/api/',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,11 +12,18 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response.status === 401) {
+    // Safety check: Make sure error.response exists before reading .status
+    if (error.response && error.response.status === 401) {
       const authStore = useAuthStore()
       authStore.clearAuth() // Clear auth state on token expiry
-      window.location.href = '/login' // Redirect to login
+
+      // Only redirect if we aren't already on the signin page!
+      if (router.currentRoute.value.name !== 'signin') {
+        router.push({ name: 'signin' }) // Smooth Vue routing, NO hard refresh!
+      }
     }
+    
+    // Always return the rejected promise so your login view can catch the bad password error
     return Promise.reject(error)
   },
 )
