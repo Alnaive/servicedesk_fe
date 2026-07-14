@@ -13,12 +13,13 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true },
     },
     {
-      path: '/ticket',
+      path: '/tickets',
       name: 'ticket',
       component: TicketView,
-      meta: { layout: 'auth' },
+      meta: { requiresAuth: true },
     },
     {
       path: '/signin',

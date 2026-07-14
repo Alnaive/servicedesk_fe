@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import router from '@/router' // Import your Vue Router instance directly
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000/api/',
+  baseURL: 'http://10.10.104.70:3000/api/'||'http://localhost:3000/api/' || 'http://pss.servicedesk.co.id:3000/api/',
   headers: {
     'Content-Type': 'application/json',
   },

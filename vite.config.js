@@ -17,4 +17,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    host: true, // Equivalent to running --host
+    allowedHosts: [
+      'pss.servicedesk.co.id' // Allows your MikroTik domain
+    ]
+  }
 })
