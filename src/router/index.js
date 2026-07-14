@@ -6,6 +6,8 @@ import CreateServices from '@/views/Services/create.vue'
 import LoginView from '@/views/LoginView.vue'
 import TicketView from '@/views/TicketView.vue'
 import UserView from '@/views/UserView.vue'
+import RoleView from '@/views/RoleView.vue'
+import CategoryView from '@/views/CategoryView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -19,6 +21,18 @@ const router = createRouter({
       path: '/tickets',
       name: 'ticket',
       component: TicketView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/roles',
+      name: 'roles',
+      component: RoleView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/categories',
+      name: 'categories',
+      component: CategoryView,
       meta: { requiresAuth: true },
     },
     {
@@ -67,11 +81,11 @@ router.beforeEach((to, from, next) => {
   // Case 1: Route requires auth but user has no token
   if (to.meta.requiresAuth && !authStore.token) {
     next({ name: 'signin' })
-  } 
+  }
   // Case 2: User is logged in but tries to navigate manually back to signin
   else if (to.name === 'signin' && authStore.token) {
-    next({ name: 'dashboard' }) 
-  } 
+    next({ name: 'dashboard' })
+  }
   // Case 3: Standard safe fallthrough
   else {
     next()

@@ -1,31 +1,47 @@
 <template>
-  <div class="flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg  lg:max-w-4xl mt-40 text-black">
+  <div
+    class="flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg lg:max-w-4xl mt-40 text-black"
+  >
     <!-- Left Cover Image (Visible on Large Screens) -->
-    <div class="hidden bg-cover lg:block lg:w-1/2" style="background-image: url('https://pancaran-group.co.id/wp-content/uploads/2019/10/marunda-laut.jpeg');"></div>
+    <div
+      class="hidden bg-cover lg:block lg:w-1/2"
+      style="
+        background-image: url('https://pancaran-group.co.id/wp-content/uploads/2019/10/marunda-laut.jpeg');
+      "
+    ></div>
 
     <!-- Right Content Column -->
     <div class="w-full px-6 py-8 md:px-8 lg:w-1/2 flex flex-col justify-center">
       <div class="flex justify-center mx-auto">
-        <img class="w-auto h-12 sm:h-8" src="https://psa.pancaran-group.co.id/pss/files/logo/logobg.png" alt="Logo">
+        <img
+          class="w-auto h-12 sm:h-8"
+          src="https://psa.pancaran-group.co.id/pss/files/logo/logobg.png"
+          alt="Logo"
+        />
       </div>
 
-      <p class="mt-3 text-xl text-center   font-semibold">
-        Welcome back!
-      </p>
+      <p class="mt-3 text-xl text-center font-semibold">Welcome back!</p>
 
       <div class="flex items-center justify-between mt-4">
         <span class="w-1/5 border-b dark:border-gray-600 lg:w-1/4"></span>
-        <span class="text-xs text-center  uppercase ">PSS ServiceDesk</span>
+        <span class="text-xs text-center uppercase">PSS ServiceDesk</span>
         <span class="w-1/5 border-b dark:border-gray-600 lg:w-1/4"></span>
       </div>
 
       <!-- Quick Action: Create Ticket -->
       <div class="mt-6">
-        <button 
-          @click="openModal" 
+        <button
+          @click="openModal"
           class="w-full flex items-center justify-center px-4 py-3 text-sm font-semibold text-blue-600 transition-colors duration-300 transform border border-blue-400 rounded-lg dark:border-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           Create Ticket
@@ -35,31 +51,31 @@
       <!-- Divider -->
       <div class="relative flex py-5 items-center">
         <div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
-        <span class="flex-shrink mx-4  text-sm">or login to your account</span>
+        <span class="flex-shrink mx-4 text-sm">or login to your account</span>
         <div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
       </div>
 
       <!-- Login Form -->
       <form @submit.prevent="login" class="space-y-4">
         <div>
-          <label class="block mb-2 text-sm font-medium  " for="username">Username</label>
-          <input 
-            type="text" 
+          <label class="block mb-2 text-sm font-medium" for="username">Username</label>
+          <input
+            type="text"
             id="username"
-            v-model="formData.username" 
-            class="block w-full px-4 py-2 text-gray-700 bg-white border rounded-lg  dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring focus:ring-blue-300"
+            v-model="formData.username"
+            class="block w-full px-4 py-2 text-gray-700 bg-white border rounded-lg dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring focus:ring-blue-300"
           />
         </div>
 
         <div>
           <div class="flex justify-between">
-            <label class="block mb-2 text-sm font-medium  " for="password">Password</label>
+            <label class="block mb-2 text-sm font-medium" for="password">Password</label>
           </div>
-          <input 
-            type="password" 
+          <input
+            type="password"
             id="password"
-            v-model="formData.password" 
-            class="block w-full px-4 py-2 text-gray-700 bg-white border rounded-lg  dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring focus:ring-blue-300" 
+            v-model="formData.password"
+            class="block w-full px-4 py-2 text-gray-700 bg-white border rounded-lg dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring focus:ring-blue-300"
           />
         </div>
 
@@ -68,8 +84,8 @@
         </div>
 
         <div class="pt-2">
-          <button 
-            @click.prevent="login" 
+          <button
+            @click.prevent="login"
             class="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50"
           >
             Sign In
@@ -81,23 +97,28 @@
 
   <!-- Modal Component (DaisyUI compatible structural classes) -->
   <dialog class="modal" :class="{ 'modal-open': showModal }">
-    <form @submit.prevent="saveTicket" class="modal-box bg-white text-black  max-w-lg rounded-xl shadow-2xl p-6">
-      <h3 class="font-bold text-xl border-b pb-3 border-gray-100 dark:border-gray-800">Buat Ticket</h3>
-      
+    <form
+      @submit.prevent="saveTicket"
+      class="modal-box bg-white text-black max-w-lg rounded-xl shadow-2xl p-6"
+    >
+      <h3 class="font-bold text-xl border-b pb-3 border-gray-100 dark:border-gray-800">
+        Buat Ticket
+      </h3>
+
       <div class="space-y-4 mt-4">
         <!-- Ticket Title -->
         <div>
-          <label class="block text-sm font-medium  mb-1">Nama Tiket</label>
+          <label class="block text-sm font-medium mb-1">Nama Tiket</label>
           <input
             v-model="formTicket.title"
             placeholder="Masukkan nama tiket..."
-            class="input input-bordered w-full bg-white  border-gray-300 dark:border-gray-700 focus:outline-none"
+            class="input input-bordered w-full bg-white border-gray-300 dark:border-gray-700 focus:outline-none"
           />
         </div>
 
         <!-- User Selection -->
         <div>
-          <label class="block text-sm font-medium  mb-1">Nama User</label>
+          <label class="block text-sm font-medium mb-1">Nama User</label>
           <Multiselect
             v-model="formTicket.userId"
             :options="userOptions"
@@ -108,7 +129,7 @@
 
         <!-- Category Selection -->
         <div>
-          <label class="block text-sm font-medium  mb-1">Category</label>
+          <label class="block text-sm font-medium mb-1">Category</label>
           <Multiselect
             v-model="formTicket.category"
             :options="categoryOptions"
@@ -120,12 +141,12 @@
 
         <!-- Description -->
         <div>
-          <label class="block text-sm font-medium  mb-1">Ticket Description</label>
+          <label class="block text-sm font-medium mb-1">Ticket Description</label>
           <textarea
             v-model="formTicket.description"
             placeholder="Tulis detail masalah di sini..."
             rows="3"
-            class="textarea textarea-bordered w-full bg-white  border-gray-300 focus:outline-none text-gray-900"
+            class="textarea textarea-bordered w-full bg-white border-gray-300 focus:outline-none text-gray-900"
           />
         </div>
 
@@ -135,32 +156,34 @@
           <input
             :value="assignedPersonName"
             placeholder="Automatically assigned based on category"
-            class="input input-bordered w-full  border-gray-200 "
-            disabled 
+            class="input input-bordered w-full border-gray-200"
+            disabled
           />
         </div>
 
         <!-- File Attachment -->
         <div>
-          <label class="block text-sm font-medium  mb-1">Attachment</label>
+          <label class="block text-sm font-medium mb-1">Attachment</label>
           <input
-          ref="fileInput"
+            ref="fileInput"
             type="file"
             @change="handleFileChange"
-            class="block w-full text-sm text-gray-500  
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-full file:border-0
-              file:text-sm file:font-semibold
-              file:bg-blue-50 file:text-blue-700
-              file:bg-blue-500 dark:file:text-gray-200"
+            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 file:bg-blue-500 dark:file:text-gray-200"
           />
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="modal-action mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-        <button type="button" class="btn btn-ghost px-5 rounded-lg" @click="closeModal">Cancel</button>
-        <button type="submit" class="btn btn-primary bg-blue-600 border-none hover:bg-blue-700 text-white px-6 rounded-lg">Save Ticket</button>
+        <button type="button" class="btn btn-ghost px-5 rounded-lg" @click="closeModal">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary bg-blue-600 border-none hover:bg-blue-700 text-white px-6 rounded-lg"
+        >
+          Save Ticket
+        </button>
       </div>
     </form>
   </dialog>
@@ -171,9 +194,8 @@ import axiosInstance from '../services/header'
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
-import Multiselect from '@vueform/multiselect';
-import '@vueform/multiselect/themes/default.css';
-import Loading from 'vue-loading-overlay'
+import Multiselect from '@vueform/multiselect'
+import '@vueform/multiselect/themes/default.css'
 import 'vue-loading-overlay/dist/css/index.css'
 import Swal from 'sweetalert2'
 
@@ -209,18 +231,22 @@ const dataUser = ref()
 const dataCategory = ref()
 
 const userOptions = computed(() => {
-  return dataUser.value?.map(user => ({
-    value: user.id,
-    label: user.name
-  })) || [];
-});
+  return (
+    dataUser.value?.map((user) => ({
+      value: user.id,
+      label: user.name,
+    })) || []
+  )
+})
 
 const categoryOptions = computed(() => {
-  return dataCategory.value?.map(cat => ({
-    value: cat.id,
-    label: cat.name
-  })) || [];
-});
+  return (
+    dataCategory.value?.map((cat) => ({
+      value: cat.id,
+      label: cat.name,
+    })) || []
+  )
+})
 
 const handleCategoryChange = (selectedCategoryId) => {
   if (!selectedCategoryId) {
@@ -228,7 +254,7 @@ const handleCategoryChange = (selectedCategoryId) => {
     return
   }
 
-  const selectedCategory = dataCategory.value?.find(cat => cat.id === selectedCategoryId)
+  const selectedCategory = dataCategory.value?.find((cat) => cat.id === selectedCategoryId)
   if (selectedCategory) {
     formTicket.value.personAssigned = selectedCategory.personAssigned || ''
   }
@@ -237,7 +263,7 @@ const handleCategoryChange = (selectedCategoryId) => {
 const assignedPersonName = computed(() => {
   const assignedId = formTicket.value.personAssigned
   if (!assignedId) return ''
-  const user = dataUser.value?.find(u => u.id === assignedId)
+  const user = dataUser.value?.find((u) => u.id === assignedId)
   return user ? user.name : ''
 })
 
@@ -328,7 +354,7 @@ async function login() {
 }
 
 const fetchCategory = async () => {
-  try{
+  try {
     const response = await axiosInstance.get('/category')
     dataCategory.value = response.data
   } catch (error) {
@@ -337,7 +363,7 @@ const fetchCategory = async () => {
 }
 
 const fetchUser = async () => {
-  try{
+  try {
     const response = await axiosInstance.get('/auth/getAllUser')
     dataUser.value = response.data
   } catch (error) {
