@@ -1,349 +1,272 @@
 <template>
-  <div class="bg-transparent">
-    <div class="container flex items-center px-6 py-4 mx-auto overflow-x-auto whitespace-nowrap">
-      <RouterLink to="/" class="text-gray-600 dark:text-gray-200">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"
-          />
-        </svg>
-      </RouterLink>
-
-      <span class="mx-5 text-gray-500 dark:text-gray-300 rtl:-scale-x-100">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </span>
-
-      <span class="text-blue-500 font-semibold"> Category Management </span>
+  <!-- Breadcrumbs & Navigation Wrap -->
+  <div class="bg-transparent py-4 px-6">
+    <div class="breadcrumbs text-sm p-0 overflow-x-auto whitespace-nowrap container mx-auto">
+      <ul>
+        <li>
+          <RouterLink :to="{ name: 'home' }" class="flex items-center gap-1">
+            <Icon icon="lucide:home" class="w-4 h-4" />
+            <span>Home</span>
+          </RouterLink>
+        </li>
+        <li class="text-primary font-semibold">
+          <Icon icon="lucide:tags" class="w-4 h-4 mr-1" />
+          Category Management
+        </li>
+      </ul>
     </div>
   </div>
 
-  <div class="container mx-auto p-4 mt-4 card bg-white dark:bg-gray-800 text-black dark:text-white">
-    <section class="container px-4 mx-auto">
-      <div class="sm:flex sm:items-center sm:justify-between">
+  <!-- Primary Management Console -->
+  <div class="container mx-auto p-4 mt-2">
+    <div class="card bg-base-100 border border-base-200 shadow-sm p-6">
+      
+      <!-- Action & Header Bar -->
+      <div class="sm:flex sm:items-center sm:justify-between gap-4">
         <div>
           <div class="flex items-center gap-x-3">
-            <h2 class="text-lg font-medium text-gray-800 dark:text-white">Ticket Categories</h2>
-            <span
-              class="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full dark:bg-gray-800 dark:text-blue-400"
-            >
+            <h2 class="text-xl font-bold text-base-content">Ticket Categories</h2>
+            <div class="badge badge-secondary badge-sm font-medium">
               {{ pagination.totalItems }}
-            </span>
+            </div>
           </div>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-300">
+          <p class="mt-1 text-sm text-base-content/70">
             Configure system ticket categories and designate responsible support personnel.
           </p>
         </div>
 
-        <div class="flex items-center mt-4 gap-x-3">
+        <div class="flex items-center mt-4 sm:mt-0 w-full sm:w-auto">
           <button
             @click="openAddModal"
-            class="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600"
+            class="btn btn-primary btn-block sm:btn-md sm:w-auto gap-2"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="w-5 h-5"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <Icon icon="lucide:plus-circle" class="w-5 h-5" />
             <span>Add Category</span>
           </button>
         </div>
       </div>
 
+      <!-- Live Filters Toolbar -->
       <div class="mt-6 flex justify-end">
-        <div class="relative flex items-center w-full md:w-auto">
-          <span class="absolute">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="w-5 h-5 mx-3 text-gray-400 dark:text-gray-600"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-              />
-            </svg>
-          </span>
+        <label class="input input-bordered flex items-center gap-2 w-full md:w-80">
+          <Icon icon="lucide:search" class="w-4 h-4 opacity-70" />
           <input
             @input="debouncedSearch"
             v-model="searchQuery"
             type="text"
             placeholder="Search categories..."
-            class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+            class="grow"
           />
-        </div>
+        </label>
       </div>
 
-      <div class="flex flex-col mt-6">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div class="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
-              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-800">
-                  <tr>
-                    <th
-                      scope="col"
-                      class="py-3.5 px-4 text-sm font-normal text-left text-gray-500 dark:text-gray-400"
-                    >
-                      Category ID
-                    </th>
-                    <th
-                      scope="col"
-                      class="px-4 py-3.5 text-sm font-normal text-left text-gray-500 dark:text-gray-400"
-                    >
-                      Category Name
-                    </th>
-                    <th
-                      scope="col"
-                      class="px-4 py-3.5 text-sm font-normal text-left text-gray-500 dark:text-gray-400"
-                    >
-                      Person Assigned
-                    </th>
-                    <th scope="col" class="relative py-3.5 px-4">
-                      <span class="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
+      <!-- Data Presentation Layout -->
+      <div class="overflow-x-auto mt-6 border border-base-200 rounded-lg">
+        <table class="table w-full">
+          <thead>
+            <tr class="bg-base-200/50">
+              <th>Category ID</th>
+              <th>Category Name</th>
+              <th>Person Assigned</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
 
-                <tbody
-                  class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
-                >
-                  <tr
-                    v-for="category in categoriesData"
-                    :key="category.id"
-                    class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                  >
-                    <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
-                      <span class="font-semibold text-blue-600 dark:text-blue-400">{{
-                        category.id
-                      }}</span>
-                    </td>
-
-                    <td class="px-4 py-4 text-sm whitespace-nowrap">
-                      <div class="text-gray-800 dark:text-white font-medium">
-                        {{ category.name }}
-                      </div>
-                    </td>
-
-                    <td class="px-4 py-4 text-sm whitespace-nowrap">
-                      <span
-                        v-if="category.userData?.name"
-                        class="px-2.5 py-1 text-xs font-semibold rounded bg-blue-50 text-blue-700 dark:bg-gray-800 dark:text-blue-300"
-                      >
-                        {{ category.userData.name }}
-                      </span>
-                      <span v-else class="text-gray-400 text-xs italic"> Unassigned </span>
-                    </td>
-
-                    <td class="px-4 py-4 text-sm whitespace-nowrap text-right text-medium">
-                      <div class="flex items-center gap-x-2 justify-end">
-                        <button
-                          @click.stop="openEditModal(category)"
-                          class="text-gray-500 hover:text-blue-500 transition-colors"
-                        >
-                          <Icon icon="lucide:edit" class="w-4 h-4" />
-                        </button>
-                        <button
-                          @click.stop="deleteCategory(category.id)"
-                          class="text-gray-500 hover:text-red-500 transition-colors"
-                        >
-                          <Icon icon="lucide:trash" class="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <tr v-if="!categoriesData?.length">
-                    <td colspan="4" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                      No categories found.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sm:flex sm:items-center sm:justify-between mt-4">
-        <div class="w-full bg-white dark:bg-gray-800">
-          <div
-            class="container flex flex-col items-center px-6 py-5 mx-auto space-y-6 sm:flex-row sm:justify-between sm:space-y-0"
-          >
-            <div class="-mx-2">
-              <div class="flex items-center gap-4">
-                <span class="text-sm">Items per page:</span>
-                <select
-                  class="select select-ghost bg-transparent border dark:border-gray-700 rounded p-1"
-                  v-model="pageSize"
-                  @change="changePageSize"
-                >
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                  <option value="100">100</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="text-gray-500 dark:text-gray-400">
-              <span class="font-medium text-gray-700 dark:text-gray-100">
-                {{ pagination.startItem }} - {{ pagination.endItem }}
-              </span>
-              of {{ pagination.totalItems }} records
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center mt-4 space-x-2 sm:mt-0">
-          <button
-            @click="changePage(currentPage - 1)"
-            :disabled="currentPage === 1"
-            class="flex items-center justify-center w-1/2 px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md sm:w-auto gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 disabled:opacity-50"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="w-5 h-5 rtl:-scale-x-100"
+          <tbody>
+            <tr
+              v-for="category in categoriesData"
+              :key="category.id"
+              class="hover cursor-pointer"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"
-              />
-            </svg>
-            <span>previous</span>
-          </button>
+              <!-- ID Block -->
+              <td class="font-bold text-primary">
+                #{{ category.id }}
+              </td>
 
-          <div class="flex space-x-1">
+              <!-- Name -->
+              <td class="font-medium text-base-content">
+                {{ category.name }}
+              </td>
+
+              <!-- Owner -->
+              <td>
+                <div v-if="category.userData?.name" class="badge badge-info gap-1 py-3 px-3">
+                  <Icon icon="tdesign:user-filled" class="w-3.5 h-3.5" />
+                  <span class="font-medium">{{ category.userData.name }}</span>
+                </div>
+                <span v-else class="text-xs italic text-base-content/40 flex items-center gap-1">
+                  <Icon icon="lucide:user-x" class="w-3.5 h-3.5" />
+                  Unassigned
+                </span>
+              </td>
+
+              <!-- Modifiers -->
+              <td>
+                <div class="flex items-center gap-x-1 justify-end">
+                  <button
+                    @click.stop="openEditModal(category)"
+                    class="btn btn-ghost btn-square btn-sm text-info hover:bg-info/10"
+                    aria-label="Edit Category"
+                  >
+                    <Icon icon="lucide:edit" class="w-4.5 h-4.5" />
+                  </button>
+                  <button
+                    @click.stop="deleteCategory(category.id)"
+                    class="btn btn-ghost btn-square btn-sm text-error hover:bg-error/10"
+                    aria-label="Delete Category"
+                  >
+                    <Icon icon="lucide:trash-2" class="w-4.5 h-4.5" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty Matrix Feedback -->
+            <tr v-if="!categoriesData?.length">
+              <td colspan="4" class="text-center py-12 text-base-content/50">
+                <Icon icon="lucide:tag" class="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <span>No categories found.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Deck -->
+      <div class="sm:flex sm:items-center sm:justify-between mt-6 pt-4 border-t border-base-200">
+        <!-- Range Summary info -->
+        <div class="flex items-center gap-4 justify-between sm:justify-start">
+          <div class="flex items-center gap-2">
+            <span class="text-sm opacity-80">Items per page:</span>
+            <select
+              class="select select-bordered select-sm bg-transparent"
+              v-model="pageSize"
+              @change="changePageSize"
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div class="text-sm text-base-content/70">
+            <span class="font-semibold text-base-content">
+              {{ pagination.startItem }} - {{ pagination.endItem }}
+            </span>
+            of {{ pagination.totalItems }} records
+          </div>
+        </div>
+
+        <!-- Pagination Control Pipeline -->
+        <div class="flex justify-center mt-4 sm:mt-0">
+          <div class="join">
+            <button
+              @click="changePage(currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="join-item btn btn-sm btn-outline gap-1"
+            >
+              <Icon icon="lucide:chevron-left" class="w-4 h-4编制 rtl:rotate-180" />
+              <span class="hidden md:inline">Previous</span>
+            </button>
+
             <button
               v-for="page in visiblePages"
               :key="page"
               @click="changePage(page)"
-              :class="[
-                'inline-flex items-center justify-center px-4 py-1 rounded-lg transition-colors duration-300',
-                currentPage === page
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-white',
-              ]"
+              class="join-item btn btn-sm"
+              :class="currentPage === page ? 'btn-primary' : 'btn-outline'"
             >
               {{ page }}
             </button>
-          </div>
 
-          <button
-            @click="changePage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
-            class="flex items-center justify-center w-1/2 px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md sm:w-auto gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 disabled:opacity-50"
-          >
-            <span>Next</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="w-5 h-5 rtl:-scale-x-100"
+            <button
+              @click="changePage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="join-item btn btn-sm btn-outline gap-1"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"
-              />
-            </svg>
-          </button>
+              <span class="hidden md:inline">Next</span>
+              <Icon icon="lucide:chevron-right" class="w-4 h-4 rtl:rotate-180" />
+            </button>
+          </div>
         </div>
       </div>
-    </section>
+
+    </div>
   </div>
 
-  <div
-    v-if="showModal"
-    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black bg-opacity-50"
+  <!-- Form Overlay Interface -->
+  <dialog 
+    v-if="showModal" 
+    class="modal modal-open modal-bottom sm:modal-middle"
   >
-    <div class="relative w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-      <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">
+    <div class="modal-box bg-base-100 border border-base-200">
+      <h3 class="text-lg font-bold text-base-content mb-4">
         {{ isEditMode ? 'Edit Category' : 'Create New Category' }}
       </h3>
 
       <form @submit.prevent="saveCategory">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Category Name</label
-          >
+        <!-- Category input field -->
+        <div class="form-control w-full mb-4">
+          <label class="label">
+            <span class="label-text font-medium">Category Name</span>
+          </label>
           <input
             v-model="form.name"
             type="text"
             required
             placeholder="e.g. Hardware Issues"
-            class="block w-full px-4 py-2 border rounded-md dark:bg-gray-900 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="input input-bordered w-full"
           />
         </div>
 
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Person Assigned</label
-          >
+        <!-- Assignment Select box dropdown -->
+        <!-- <div class="form-control w-full mb-4">
+          <label class="label">
+            <span class="label-text font-medium">Person Assigned</span>
+          </label>
           <select
             v-model="form.personAssigned"
-            class="block w-full px-4 py-2 border rounded-md dark:bg-gray-900 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="select select-bordered w-full"
           >
             <option :value="null">Unassigned (Leave Empty)</option>
             <option v-for="user in dataUser" :key="user.id" :value="user.id">
               {{ user.name }}
             </option>
           </select>
+        </div> -->
+        <div class="form-control w-full mb-4">
+          <label class="block text-sm font-medium mb-1">Nama User</label>
+          <Multiselect
+            v-model="form.personAssigned"
+            :options="userOptions"
+            placeholder="Cari nama user..."
+            searchable
+          />
         </div>
 
-        <div class="flex justify-end gap-3 mt-6">
+        <!-- Actions -->
+        <div class="modal-action gap-2">
           <button
             type="button"
             @click="closeModal"
-            class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+            class="btn btn-outline"
           >
             Cancel
           </button>
           <button
             type="submit"
-            class="px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+            class="btn btn-primary"
           >
             Save
           </button>
         </div>
       </form>
     </div>
-  </div>
+    <!-- Back-clipping window click handler -->
+    <form method="dialog" class="modal-backdrop" @click="closeModal">
+      <button>close</button>
+    </form>
+  </dialog>
 </template>
 
 <script setup>
@@ -354,7 +277,8 @@ import { RouterLink } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import Swal from 'sweetalert2'
 import { useAuthStore } from '../stores/authStore'
-
+import Multiselect from '@vueform/multiselect'
+import '@vueform/multiselect/themes/default.css'
 const auth = useAuthStore()
 // STATE
 const categoriesData = ref([])
@@ -373,6 +297,15 @@ const loading = ref(false)
 const form = ref({
   name: '',
   personAssigned: null,
+})
+
+const userOptions = computed(() => {
+  return (
+    dataUser.value?.map((user) => ({
+      value: user.id,
+      label: user.name,
+    })) || []
+  )
 })
 
 // PAGINATION COMPUTED
@@ -529,3 +462,11 @@ onBeforeMount(() => {
   fetchUser() // Mounts users list simultaneously
 })
 </script>
+<style scoped>
+:deep(.multiselect-search) {
+  --ms-bg: #ffffff;
+  --ms-border-color: #d1d5db;
+  --ms-radius: 0.5rem; /* rounded-lg */
+  --ms-ring-color: #3b82f6;
+  --ms-ring-width: 2px;
+}</style>

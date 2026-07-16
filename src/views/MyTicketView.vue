@@ -23,7 +23,7 @@
   <!-- Main Workspace Card -->
   <div class="container mx-auto p-4 mt-2">
     <div class="card bg-base-100 border border-base-200 shadow-sm p-6">
-
+      
       <!-- Top Action Bar -->
       <div class="sm:flex sm:items-center sm:justify-between gap-4">
         <div>
@@ -36,6 +36,16 @@
           <p class="mt-1 text-sm text-base-content/70">
             Manage support and development tickets assigned under this scope.
           </p>
+        </div>
+
+        <div class="flex items-center mt-4 sm:mt-0 w-full sm:w-auto">
+          <button
+            @click="openCreateModal"
+            class="btn btn-primary btn-block sm:btn-md sm:w-auto gap-2"
+          >
+            <Icon icon="lucide:plus-circle" class="w-5 h-5" />
+            <span>Create Ticket</span>
+          </button>
         </div>
       </div>
 
@@ -79,22 +89,18 @@
           <thead>
             <tr class="bg-base-200/50">
               <th>Ticket ID</th>
-              <th>Requester</th>
               <th>Title</th>
               <th>Description</th>
               <th>Category</th>
               <th>Date Requested</th>
-              <th>Date Completed</th>
               <th>Status</th>
               <th>Priority</th>
               <th>Assigned To</th>
-              <th>Attachment</th>
-              <th>Remaks</th>
-              <th class="sticky right-0 z-20 bg-base-200 text-right shadow-lg">Actions</th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
 
-          <tbody class="relative">
+          <tbody>
             <!-- Load Indicators -->
             <tr v-if="loading">
               <td colspan="9" class="text-center py-12 text-base-content/50">
@@ -118,43 +124,33 @@
               :key="ticket.id"
               class="hover"
             >
-
-              
               <!-- Ticket ID -->
               <td class="font-bold text-primary">
-                #{{ ticket.ticketId ?? ticket.id }}
+                #{{ ticket.ticketId }}
               </td>
-              <!-- Name -->
-              <td class="font-bold text-primary">
-                {{ ticket.owner.name ?? ticket.owner.name }}
-              </td>
+              
               <!-- Title -->
               <td class="font-medium text-base-content max-w-xs truncate">
                 {{ ticket.title }}
               </td>
-
+              
               <!-- Description -->
               <td class="max-w-xs truncate text-base-content/70" :title="ticket.description">
                 {{ ticket.description || '-' }}
               </td>
-
+              
               <!-- Category Badge -->
               <td>
                 <span class="badge badge-neutral font-medium">
                   {{ ticket.categoryData?.name || ticket.category || 'General' }}
                 </span>
               </td>
-
+              
               <!-- Date Requested -->
               <td class="text-base-content/70">
                 {{ ticket.dateRequest }}
               </td>
-
-              <!-- Date Completed -->
-              <td class="text-base-content/70">
-                {{ ticket.dateCompleted }}
-              </td>
-
+              
               <!-- Status Chips -->
               <td>
                 <span
@@ -165,7 +161,7 @@
                     'badge-warning bg-warning/10 text-warning border-none'
                   ]"
                 >
-                  <span
+                  <span 
                     class="w-1.5 h-1.5 rounded-full"
                     :class="[
                       ticket.status === 'new' ? 'bg-info' :
@@ -175,53 +171,41 @@
                   {{ ticket.status }}
                 </span>
               </td>
-
+              
               <!-- Priority Text Column -->
               <td class="font-semibold">
-                <span
+                <span 
                   :class="[
-                    ticket.priority === 'High' ? 'text-error' :
+                    ticket.priority === 'High' ? 'text-error' : 
                     ticket.priority === 'Medium' ? 'text-warning' : 'text-base-content/60'
                   ]"
                 >
                   {{ ticket.priority || 'Low' }}
                 </span>
               </td>
-
+              
               <!-- User Ownership assignment -->
               <td class="text-base-content/80 font-medium">
                 {{ ticket.assignedUser?.name || 'Unassigned' }}
               </td>
-              <!-- User Ownership assignment -->
-              <td class="text-base-content/80 font-medium">
-                {{ ticket.attachment }}
-              </td>
-              <!-- User Ownership assignment -->
-              <td class="text-base-content/80 font-medium">
-                {{ ticket.remaks }}
-              </td>
               
-
               <!-- Dynamic Actions Pipeline -->
-              <td
-                class="sticky right-0 z-10 bg-base-100 shadow-lg"
-              >
-                <div class="flex items-center justify-end gap-1">
+              <td>
+                <div class="flex items-center gap-x-1 justify-end">
                   <button
-                    v-if="ticket.status !== 'Completed'"
-                    @click="markComplete(ticket)"
-                    class="btn btn-ghost btn-square btn-sm text-success hover:bg-success/10"
-                    title="Mark Complete"
-                  >
-                    <Icon icon="lucide:check-circle" class="w-4.5 h-4.5" />
-                  </button>
-
-                  <button
-                    @click="editModal(ticket.id)"
+                    v-if="ticket.status === 'new' || ticket.userId !== auth.user?.id"
+                    @click="openEditModal(ticket)"
                     class="btn btn-ghost btn-square btn-sm text-info hover:bg-info/10"
                     title="Edit Ticket"
                   >
                     <Icon icon="lucide:edit" class="w-4.5 h-4.5" />
+                  </button>
+                  <button
+                    @click="deleteTicket(ticket.id)"
+                    class="btn btn-ghost btn-square btn-sm text-error hover:bg-error/10"
+                    title="Delete Ticket"
+                  >
+                    <Icon icon="lucide:trash-2" class="w-4.5 h-4.5" />
                   </button>
                 </div>
               </td>
@@ -262,7 +246,7 @@
               :disabled="currentPage === 1"
               class="join-item btn btn-sm btn-outline gap-1"
             >
-              <Icon icon="lucide:chevron-left" class="w-4 h-4" />
+              <Icon icon="lucide:chevron-left" class="w-4 h-4 rtl:rotate-180" />
               <span class="hidden md:inline">Previous</span>
             </button>
 
@@ -282,7 +266,7 @@
               class="join-item btn btn-sm btn-outline gap-1"
             >
               <span class="hidden md:inline">Next</span>
-              <Icon icon="lucide:chevron-right" class="w-4 h-4" />
+              <Icon icon="lucide:chevron-right" class="w-4 h-4 rtl:rotate-180" />
             </button>
           </div>
         </div>
@@ -292,59 +276,59 @@
   </div>
 
   <!-- Dialog Form Overlays Workspace -->
-  <dialog
-    v-if="showModal"
+  <dialog 
+    v-if="showModal" 
     class="modal modal-open modal-bottom sm:modal-middle"
   >
     <div class="modal-box bg-base-100 border border-base-200 shadow-xl max-w-md">
       <div class="flex items-start justify-between pb-3 border-b border-base-200">
         <h3 class="text-lg font-bold text-base-content">
-          
+          {{ isEditing ? 'Edit Ticket' : 'Create New Ticket' }}
         </h3>
-        <button
-          @click="closeModal"
+        <button 
+          @click="closeModal" 
           class="btn btn-sm btn-circle btn-ghost text-base-content/60"
         >
           ✕
         </button>
       </div>
 
-      <form @submit.prevent="updateTicket" class="space-y-4 mt-4">
-        <!-- Title Input field -->
+      <form @submit.prevent="handleSubmit" class="space-y-4 mt-4">
+        <!-- Title Input field component shape -->
         <div class="form-control w-full">
           <label class="label"><span class="label-text font-medium">Title</span></label>
           <input
-            v-model="formTicket.title"
+            v-model="form.title"
             type="text"
             required
             class="input input-bordered w-full"
           />
         </div>
-        <!-- Description Textarea -->
+
+        <!-- Description Textarea shape -->
         <div class="form-control w-full">
           <label class="label"><span class="label-text font-medium">Description</span></label>
           <textarea
-            v-model="formTicket.description"
+            v-model="form.description"
             rows="3"
             class="textarea textarea-bordered w-full"
           ></textarea>
         </div>
 
-        <!-- Sub Grid for Category & Priority -->
+        <!-- Sub Grid for Dropdowns fields -->
         <div class="grid grid-cols-2 gap-4">
           <div class="form-control w-full">
             <label class="label"><span class="label-text font-medium">Category</span></label>
-            <Multiselect
-              v-model="formTicket.category"
-              :options="categoryOptions"
-              placeholder="Select Category..."
-              searchable
-              @change="handleCategoryChange"
+            <input
+              v-model="form.category"
+              type="text"
+              placeholder="e.g., Bug, Feature"
+              class="input input-bordered w-full"
             />
           </div>
           <div class="form-control w-full">
             <label class="label"><span class="label-text font-medium">Priority</span></label>
-            <select v-model="formTicket.priority" class="select select-bordered w-full">
+            <select v-model="form.priority" class="select select-bordered w-full">
               <option value="Low">Low</option>
               <option value="Medium">Medium</option>
               <option value="High">High</option>
@@ -352,58 +336,27 @@
           </div>
         </div>
 
-        <!-- Person Assigned Dropdown Option -->
-        <div class="form-control w-full">
-          <label class="label">
-            <span class="label-text font-medium">Assign To</span>
-            <span v-if="assignedPersonName" class="label-text-alt text-primary font-medium">
-              ({{ assignedPersonName }})
-            </span>
-          </label>
-          <Multiselect
-            v-model="formTicket.personAssigned"
-            :options="userOptions"
-            placeholder="Select User..."
-            searchable
-          />
-        </div>
-
-        <!-- Inline Status Updates -->
-        <div class="form-control w-full">
+        <!-- Inline Status updates (Edit Mode Only) -->
+        <div v-if="isEditing" class="form-control w-full">
           <label class="label"><span class="label-text font-medium">Status</span></label>
-          <select v-model="formTicket.status" class="select select-bordered w-full">
+          <select v-model="form.status" class="select select-bordered w-full">
             <option value="new">New</option>
             <option value="Ongoing">Ongoing</option>
             <option value="Completed">Completed</option>
           </select>
         </div>
-        <!-- Inline Status Updates -->
-        <div class="form-control w-full">
-          <label class="label"><span class="label-text font-medium">Date Complete</span></label>
-          <VueDatePicker v-model="formTicket.dateCompleted"></VueDatePicker>
-        </div>
-        <!-- File Upload Component -->
+
+        <!-- File upload component system layout shape -->
         <div class="form-control w-full">
           <label class="label"><span class="label-text font-medium">Attachment File</span></label>
           <input
-            ref="fileInput"
             type="file"
-            @change="handleFileChange"
+            @change="handleFileUpload"
             class="file-input file-input-bordered file-input-primary w-full text-sm"
           />
         </div>
 
-        <!-- remaks Textarea -->
-        <div class="form-control w-full">
-          <label class="label"><span class="label-text font-medium">remaks</span></label>
-          <textarea
-            v-model="formTicket.remaks"
-            rows="3"
-            class="textarea textarea-bordered w-full"
-          ></textarea>
-        </div>
-
-        <!-- Form Dialog Actions Deck -->
+        <!-- Form Dialog Actions Deck alignment -->
         <div class="modal-action border-t border-base-200 pt-4 gap-2">
           <button
             type="button"
@@ -415,16 +368,13 @@
           <button
             type="submit"
             class="btn btn-primary"
-            :disabled="submitting"
           >
-            <span class="loading loading-spinner loading-xs"></span>
-           Save
+            {{ isEditing ? 'Save Changes' : 'Submit Ticket' }}
           </button>
         </div>
       </form>
     </div>
-
-    <!-- Window backdrop exit handler -->
+    <!-- Window backdrop exit capture handler -->
     <form method="dialog" class="modal-backdrop" @click="closeModal">
       <button>close</button>
     </form>
@@ -439,19 +389,10 @@ import { RouterLink } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import Swal from 'sweetalert2'
 import { useAuthStore } from '../stores/authStore'
-import Multiselect from '@vueform/multiselect'
-import '@vueform/multiselect/themes/default.css'
-import { VueDatePicker } from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css'
 
 const auth = useAuthStore()
-const fileInput = ref(null)
 
-const props = defineProps({
-  id: String, // Project scope configuration ID
-})
-
-// ---- List / table state ----
+// State Configuration
 const dataTicket = ref([])
 const statusFilter = ref('')
 const currentPage = ref(1)
@@ -461,170 +402,28 @@ const totalItems = ref(0)
 const totalPages = ref(0)
 const loading = ref(false)
 
-// ---- Modal / form state ----
 const showModal = ref(false)
-const submitting = ref(false)
+const isEditing = ref(false)
+const selectedTicketId = ref(null)
+const uploadedFile = ref(null)
 
-const dataCategory = ref([])
-const dataUser = ref([])
+// Store the active status of the ticket being edited to guard on frontend
+const currentEditingTicketStatus = ref('new')
 
-// Unified Single Form State
-const defaultForm = () => ({
-  id: '',
+const form = ref({
   title: '',
   description: '',
   category: '',
   priority: 'Low',
   status: 'new',
-  personAssigned: '',
-  remaks: '',
-  attachment: null,
-  name: '',
-  dateRequest: '',
-  dateCompleted:'',
+  userId: null,
 })
 
-const formTicket = ref(defaultForm())
-
-const formUpdateStatus = ref({
-  status: 'Completed',
-  dateCompleted: new Date().toISOString(),
+const props = defineProps({
+  id: String, // Project scope configuration ID
 })
 
-const handleFileChange = (event) => {
-  const file = event.target.files[0]
-  formTicket.value.attachment = file
-}
-
-const userOptions = computed(() => {
-  return dataUser.value?.map((user) => ({
-    value: user.id,
-    label: user.name,
-  })) || []
-})
-
-const categoryOptions = computed(() => {
-  return dataCategory.value?.map((cat) => ({
-    value: cat.id,
-    label: cat.name,
-  })) || []
-})
-
-const handleCategoryChange = (selectedCategoryId) => {
-  if (!selectedCategoryId) {
-    formTicket.value.personAssigned = ''
-    return
-  }
-  const selectedCategory = dataCategory.value?.find((cat) => cat.id === selectedCategoryId)
-  if (selectedCategory) {
-    formTicket.value.personAssigned = selectedCategory.personAssigned || ''
-  }
-}
-
-const assignedPersonName = computed(() => {
-  const assignedId = formTicket.value.personAssigned
-  if (!assignedId) return ''
-  const user = dataUser.value?.find((u) => u.id === assignedId)
-  return user ? user.name : ''
-})
-
-const updateTicket = async () => {
-  if (submitting.value) return
-
-  submitting.value = true
-
-  try {
-    const formData = new FormData()
-
-    formData.append('title', formTicket.value.title)
-    formData.append('description', formTicket.value.description)
-    formData.append('category', formTicket.value.category)
-    formData.append('priority', formTicket.value.priority)
-    formData.append('status', formTicket.value.status)
-    formData.append('personAssigned', formTicket.value.personAssigned)
-    formData.append('remaks', formTicket.value.remaks)
-    formData.append(
-      "dateCompleted",
-      formTicket.value.dateCompleted
-        ? formTicket.value.dateCompleted.toISOString()
-        : ""
-    );
-
-    if (formTicket.value.attachment) {
-      formData.append('attachment', formTicket.value.attachment)
-    }
-
-    await axiosInstance.put(
-      `/tickets/${formTicket.value.id}`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-    )
-
-    Swal.fire({
-      icon: 'success',
-      title: 'Ticket Updated',
-      timer: 1500,
-      showConfirmButton: false,
-    })
-
-    closeModal()
-    fetchTickets()
-
-  } catch (error) {
-    console.error(error.response?.data || error)
-
-    Swal.fire({
-      icon: 'error',
-      title: 'Update Failed',
-      text: error.response?.data?.message || 'Something went wrong',
-    })
-
-  } finally {
-    submitting.value = false
-  }
-}
-const editModal = (ticketId) => {
-  const ticket = dataTicket.value.find(t => t.id === ticketId)
-
-  if (!ticket) return
-
-  formTicket.value = {
-    id: ticket.id,
-    title: ticket.title,
-    description: ticket.description,
-    category: ticket.categoryData?.id || ticket.category,
-    priority: ticket.priority,
-    status: ticket.status,
-    personAssigned: ticket.assignedUser?.id || '',
-    remaks: ticket.remaks || '',
-    attachment: null,
-    dateRequest: ticket.dateRequest,
-    dateCompleted: ticket.dateCompleted
-    ? new Date(ticket.dateCompleted)
-    : null,
-    name: ticket.name
-  }
-
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
-
-  showModal.value = true
-}
-
-
-const closeModal = () => {
-  showModal.value = false
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
-}
-
-// ---- Computeds ----
+// Computeds
 const pagination = computed(() => ({
   startItem: totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize.value + 1,
   endItem: Math.min(currentPage.value * pageSize.value, totalItems.value),
@@ -638,7 +437,7 @@ const visiblePages = computed(() => {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
 
-// ---- Pagination / filter operations ----
+// Operations & Filtering
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
@@ -662,15 +461,14 @@ const debouncedSearch = debounce(() => {
   fetchTickets()
 }, 300)
 
-// ---- Fetch Data Engine ----
+// Fetch Data Engine
 const fetchTickets = async () => {
   if (loading.value) return
   loading.value = true
 
   try {
-    const response = await axiosInstance.get(`/tickets`, {
+    const response = await axiosInstance.get(`/tickets/myTicket`, {
       params: {
-        projectId: props.id,
         page: currentPage.value,
         limit: pageSize.value,
         search: searchQuery.value,
@@ -682,102 +480,146 @@ const fetchTickets = async () => {
     totalPages.value = response.data.totalPages || 0
   } catch (error) {
     console.error('Fetch tickets runtime crash:', error)
-    Swal.fire({
-      icon: 'error',
-      title: 'Failed to load tickets',
-      text: error.response?.data?.message || error.message,
-    })
   } finally {
     loading.value = false
   }
 }
 
-// ---- Delete ----
-const deleteTicket = async (ticketId) => {
-  const confirm = await Swal.fire({
+// Modal Form Controllers
+const openCreateModal = () => {
+  isEditing.value = false
+  selectedTicketId.value = null
+  uploadedFile.value = null
+  currentEditingTicketStatus.value = 'new'
+  form.value = {
+    title: '',
+    description: '',
+    category: '',
+    priority: 'Low',
+    status: 'new',
+    userId: auth.user?.id,
+  }
+  showModal.value = true
+}
+
+const openEditModal = (ticket) => {
+  // Frontend guard matching backend rule: ticket must be status 'new' to modify own ticket
+  if (ticket.userId === auth.user?.id && ticket.status !== 'new') {
+    Swal.fire({
+      icon: 'error',
+      title: 'Action Denied',
+      text: 'Tickets that are already in progress or closed cannot be modified.',
+    })
+    return
+  }
+
+  isEditing.value = true
+  selectedTicketId.value = ticket.id
+  uploadedFile.value = null
+  currentEditingTicketStatus.value = ticket.status
+  form.value = {
+    title: ticket.title,
+    description: ticket.description,
+    category: ticket.categoryData?.name || ticket.category || '',
+    priority: ticket.priority || 'Low',
+    status: ticket.status || 'new',
+    userId: ticket.userId,
+  }
+  showModal.value = true
+}
+
+const closeModal = () => {
+  showModal.value = false
+}
+
+const handleFileUpload = (event) => {
+  uploadedFile.value = event.target.files[0]
+}
+
+// Create & Update Handler
+const handleSubmit = async () => {
+  // Extra client check before submission for absolute validation match
+  if (
+    isEditing.value &&
+    form.value.userId === auth.user?.id &&
+    currentEditingTicketStatus.value !== 'new'
+  ) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Modification Restrained',
+      text: 'This ticket is no longer in its initial state and cannot be modified.',
+    })
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('title', form.value.title)
+  formData.append('description', form.value.description)
+  formData.append('category', form.value.category)
+  formData.append('priority', form.value.priority)
+  formData.append('status', form.value.status)
+  if (form.value.userId) formData.append('userId', form.value.userId)
+  if (uploadedFile.value) formData.append('attachment', uploadedFile.value)
+
+  try {
+    if (isEditing.value) {
+      const targetEndpoint = form.value.userId === auth.user?.id ? 'updateMyTicket' : 'updateTicket'
+      await axiosInstance.put(`/tickets/${targetEndpoint}/${selectedTicketId.value}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      Swal.fire({ icon: 'success', title: 'Ticket Updated', timer: 1500, showConfirmButton: false })
+    } else {
+      await axiosInstance.post('/tickets/createTicket', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      Swal.fire({
+        icon: 'success',
+        title: 'Ticket Added Successfully',
+        timer: 1500,
+        showConfirmButton: false,
+      })
+    }
+    closeModal()
+    fetchTickets()
+  } catch (error) {
+    console.error('Submission processing error:', error)
+    Swal.fire({
+      icon: 'error',
+      title: 'Failed to save ticket',
+      text: error.response?.data?.message || 'Network submission fault.',
+    })
+  }
+}
+
+// Delete Route Operations
+const deleteTicket = async (id) => {
+  const result = await Swal.fire({
+    title: 'Delete ticket entry?',
+    text: 'This action cannot be undone and will scrub database associations.',
     icon: 'warning',
-    title: 'Delete this ticket?',
-    text: 'This action cannot be undone.',
     showCancelButton: true,
+    confirmButtonColor: '#d33',
     confirmButtonText: 'Delete',
-    confirmButtonColor: '#dc2626',
   })
 
-  if (!confirm.isConfirmed) return
+  if (!result.isConfirmed) return
 
   try {
-    await axiosInstance.delete(`/tickets/${ticketId}`)
-    Swal.fire({
-      icon: 'success',
-      title: 'Ticket Deleted',
-      timer: 1500,
-      showConfirmButton: false,
-    })
+    await axiosInstance.delete(`/tickets/${id}`)
+    Swal.fire({ icon: 'success', title: 'Removed!', timer: 1500, showConfirmButton: false })
     fetchTickets()
   } catch (error) {
-    console.error('Delete Ticket Error:', error.response?.data || error)
+    console.error('Delete action failed:', error)
     Swal.fire({
       icon: 'error',
-      title: 'Failed to delete ticket',
-      text: error.response?.data?.message || error.message,
+      title: 'Failed deletion parameters',
+      text: error.response?.data?.message || 'Access Denied / Network Issue.',
     })
   }
 }
 
-// ---- Mark Complete ----
-const markComplete = async (ticket) => {
-  try {
-    await axiosInstance.put(`/tickets/updateDateCompleted/${ticket.id}`, formUpdateStatus.value)
-    Swal.fire({
-      icon: 'success',
-      title: 'Ticket Status Updated',
-      timer: 1500,
-      showConfirmButton: false,
-    })
-    fetchTickets()
-  } catch (error) {
-    console.error(error.response?.data || error)
-    Swal.fire({
-      icon: 'error',
-      title: 'Failed to update status',
-      text: error.response?.data?.message || error.message,
-    })
-  }
-}
-
-const fetchCategory = async () => {
-  try {
-    const response = await axiosInstance.get('/category')
-    dataCategory.value = response.data || []
-  } catch (error) {
-    console.error('Failed to fetch data:', error)
-  }
-}
-
-const fetchUser = async () => {
-  try {
-    const response = await axiosInstance.get('/auth/getAllUser')
-    dataUser.value = response.data || []
-  } catch (error) {
-    console.error('Failed to fetch data:', error)
-  }
-}
-
-onBeforeMount(async() => {
-  await fetchCategory()
-  await fetchUser()
-  await fetchTickets()
+onBeforeMount(() => {
+  form.value.userId = auth.user?.id
+  fetchTickets()
 })
 </script>
-
-<style scoped>
-:deep(.multiselect-search) {
-  --ms-bg: #ffffff;
-  --ms-border-color: #d1d5db;
-  --ms-radius: 0.5rem;
-  --ms-ring-color: #3b82f6;
-  --ms-ring-width: 2px;
-}
-
-
-</style>

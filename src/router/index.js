@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import DashboardVue from '@/views/Dashboard.vue'
-import ServiceViewVue from '@/views/Services/Index.vue'
 import CreateServices from '@/views/Services/create.vue'
 import LoginView from '@/views/LoginView.vue'
 import TicketView from '@/views/TicketView.vue'
+import MyTicketView from '@/views/MyTicketView.vue'
 import UserView from '@/views/UserView.vue'
 import RoleView from '@/views/RoleView.vue'
 import CategoryView from '@/views/CategoryView.vue'
@@ -21,6 +21,12 @@ const router = createRouter({
       path: '/tickets',
       name: 'ticket',
       component: TicketView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/mytickets',
+      name: 'myticket',
+      component: MyTicketView,
       meta: { requiresAuth: true },
     },
     {
