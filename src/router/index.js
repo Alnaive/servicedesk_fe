@@ -8,6 +8,7 @@ import MyTicketView from '@/views/MyTicketView.vue'
 import UserView from '@/views/UserView.vue'
 import RoleView from '@/views/RoleView.vue'
 import CategoryView from '@/views/CategoryView.vue'
+import AssetView from '@/views/AssetView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -65,6 +66,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
       component: CreateServices,
     },
+    {
+      path: '/assets',
+      name: 'asset',
+      meta: { requiresAuth: true },
+      component: AssetView
+    }
   ],
 })
 

@@ -100,6 +100,14 @@
               <Icon icon="lucide:users" class="w-5 h-5" />
               <span class="mx-2 text-sm font-medium">Users</span>
             </RouterLink>
+            <RouterLink 
+              :to="{ name: 'asset' }" 
+              class="flex items-center px-3 py-2 transition-colors duration-300 transform rounded-lg text-base-content hover:bg-base-200"
+              active-class="bg-base-200 font-semibold"
+            >
+              <Icon icon="lucide:tags" class="w-5 h-5" />
+              <span class="mx-2 text-sm font-medium">Asset</span>
+            </RouterLink>
           </div>
         </div>
       </nav>

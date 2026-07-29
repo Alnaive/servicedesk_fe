@@ -216,6 +216,7 @@ const formTicket = ref({
   userId: '',
   title: '',
   category: '',
+  priority:'low',
   description: '',
   personAssigned: '',
   dateRequest: '',
@@ -301,6 +302,7 @@ const openModal = () => {
   formTicket.value.userId = ''
   formTicket.value.title = ''
   formTicket.value.category = ''
+  formTicket.value.priority = ''
   formTicket.value.description = ''
   formTicket.value.personAssigned = ''
   formTicket.value.dateRequest = ''
