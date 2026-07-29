@@ -9,6 +9,7 @@ import UserView from '@/views/UserView.vue'
 import RoleView from '@/views/RoleView.vue'
 import CategoryView from '@/views/CategoryView.vue'
 import AssetView from '@/views/AssetView.vue'
+import AssetCategoryView from '@/views/AssetCategoryView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -70,8 +71,14 @@ const router = createRouter({
       path: '/assets',
       name: 'asset',
       meta: { requiresAuth: true },
-      component: AssetView
-    }
+      component: AssetView,
+    },
+    {
+      path: '/asset-categories',
+      name: 'asset-categories',
+      meta: { requiresAuth: true },
+      component: AssetCategoryView,
+    },
   ],
 })
 
