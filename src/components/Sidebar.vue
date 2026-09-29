@@ -65,59 +65,74 @@
           <!-- Dropdown Content (Nested Links) -->
           <div class="collapse-content pl-6 pr-0 pt-2 space-y-2">
             <RouterLink
-              :to="{ name: 'ticket' }"
-              class="flex items-center px-3 py-2 transition-colors duration-300 transform rounded-lg text-base-content hover:bg-base-200"
-              active-class="bg-base-200 font-semibold"
-            >
-              <Icon icon="lucide:ticket" class="w-5 h-5" />
-              <span class="mx-2 text-sm font-medium">Tickets</span>
-            </RouterLink>
+      :to="{ name: 'ticket' }"
+      @click="handleLinkClick"
+      class="flex items-center px-3 py-2 transition-colors duration-200 rounded-lg text-base-content/80 hover:text-base-content hover:bg-base-200"
+      active-class="bg-primary/10 text-primary font-semibold"
+    >
+      <Icon icon="lucide:ticket-check" class="w-4 h-4 shrink-0" />
+      <span class="mx-3 text-sm font-medium">Tickets</span>
+    </RouterLink>
 
-            <!-- Categories -->
-            <RouterLink
-              :to="{ name: 'categories' }"
-              class="flex items-center px-3 py-2 transition-colors duration-300 transform rounded-lg text-base-content hover:bg-base-200"
-              active-class="bg-base-200 font-semibold"
-            >
-              <Icon icon="lucide:tags" class="w-5 h-5" />
-              <span class="mx-2 text-sm font-medium">Categories</span>
-            </RouterLink>
+    <RouterLink
+      :to="{ name: 'categories' }"
+      @click="handleLinkClick"
+      class="flex items-center px-3 py-2 transition-colors duration-200 rounded-lg text-base-content/80 hover:text-base-content hover:bg-base-200"
+      active-class="bg-primary/10 text-primary font-semibold"
+    >
+      <Icon icon="lucide:tags" class="w-4 h-4 shrink-0" />
+      <span class="mx-3 text-sm font-medium">Categories</span>
+    </RouterLink>
 
-            <!-- Roles -->
-            <RouterLink
-              :to="{ name: 'roles' }"
-              class="flex items-center px-3 py-2 transition-colors duration-300 transform rounded-lg text-base-content hover:bg-base-200"
-              active-class="bg-base-200 font-semibold"
-            >
-              <Icon icon="carbon:user-role" class="w-5 h-5" />
-              <span class="mx-2 text-sm font-medium">Roles</span>
-            </RouterLink>
+    <RouterLink
+      :to="{ name: 'roles' }"
+      @click="handleLinkClick"
+      class="flex items-center px-3 py-2 transition-colors duration-200 rounded-lg text-base-content/80 hover:text-base-content hover:bg-base-200"
+      active-class="bg-primary/10 text-primary font-semibold"
+    >
+      <Icon icon="carbon:user-role" class="w-4 h-4 shrink-0" />
+      <span class="mx-3 text-sm font-medium">Roles</span>
+    </RouterLink>
 
-            <!-- Users -->
-            <RouterLink
-              :to="{ name: 'user' }"
-              class="flex items-center px-3 py-2 transition-colors duration-300 transform rounded-lg text-base-content hover:bg-base-200"
-              active-class="bg-base-200 font-semibold"
-            >
-              <Icon icon="lucide:users" class="w-5 h-5" />
-              <span class="mx-2 text-sm font-medium">Users</span>
-            </RouterLink>
-            <RouterLink
-              :to="{ name: 'asset' }"
-              class="flex items-center px-3 py-2 transition-colors duration-300 transform rounded-lg text-base-content hover:bg-base-200"
-              active-class="bg-base-200 font-semibold"
-            >
-              <Icon icon="lucide:tags" class="w-5 h-5" />
-              <span class="mx-2 text-sm font-medium">Asset</span>
-            </RouterLink>
-            <RouterLink
-              :to="{ name: 'asset-categories' }"
-              class="flex items-center px-3 py-2 transition-colors duration-300 transform rounded-lg text-base-content hover:bg-base-200"
-              active-class="bg-base-200 font-semibold"
-            >
-              <Icon icon="lucide:tags" class="w-5 h-5" />
-              <span class="mx-2 text-sm font-medium">Asset Categories</span>
-            </RouterLink>
+    <RouterLink
+      :to="{ name: 'user' }"
+      @click="handleLinkClick"
+      class="flex items-center px-3 py-2 transition-colors duration-200 rounded-lg text-base-content/80 hover:text-base-content hover:bg-base-200"
+      active-class="bg-primary/10 text-primary font-semibold"
+    >
+      <Icon icon="lucide:users" class="w-4 h-4 shrink-0" />
+      <span class="mx-3 text-sm font-medium">Users</span>
+    </RouterLink>
+
+    <RouterLink
+      :to="{ name: 'asset' }"
+      @click="handleLinkClick"
+      class="flex items-center px-3 py-2 transition-colors duration-200 rounded-lg text-base-content/80 hover:text-base-content hover:bg-base-200"
+      active-class="bg-primary/10 text-primary font-semibold"
+    >
+      <Icon icon="lucide:box" class="w-4 h-4 shrink-0" />
+      <span class="mx-3 text-sm font-medium">Asset</span>
+    </RouterLink>
+
+    <RouterLink
+      :to="{ name: 'asset-categories' }"
+      @click="handleLinkClick"
+      class="flex items-center px-3 py-2 transition-colors duration-200 rounded-lg text-base-content/80 hover:text-base-content hover:bg-base-200"
+      active-class="bg-primary/10 text-primary font-semibold"
+    >
+      <Icon icon="lucide:folder-tree" class="w-4 h-4 shrink-0" />
+      <span class="mx-3 text-sm font-medium">Asset Categories</span>
+    </RouterLink>
+
+    <RouterLink
+      :to="{ name: 'sap' }"
+      @click="handleLinkClick"
+      class="flex items-center px-3 py-2 transition-colors duration-200 rounded-lg text-base-content/80 hover:text-base-content hover:bg-base-200"
+      active-class="bg-primary/10 text-primary font-semibold"
+    >
+      <Icon icon="lucide:database" class="w-4 h-4 shrink-0" />
+      <span class="mx-3 text-sm font-medium">SAP Records</span>
+    </RouterLink>
           </div>
         </div>
       </nav>

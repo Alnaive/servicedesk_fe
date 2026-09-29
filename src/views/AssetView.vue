@@ -24,11 +24,19 @@
       <!-- Header Action: Add Asset Button -->
       <template #action>
         <div class="flex items-center gap-2 w-full sm:w-auto">
-          <!-- Create Asset Button -->
           <button @click="openCreateModal" class="btn btn-primary btn-sm gap-2 w-full sm:w-auto">
             <Icon icon="lucide:plus" class="w-4 h-4" />
             <span>Add Asset</span>
           </button>
+          <button 
+      @click="handleExport" 
+      :disabled="isExporting" 
+      class="btn btn-outline btn-sm gap-2 w-full sm:w-auto"
+    >
+      <span v-if="isExporting" class="loading loading-spinner loading-xs"></span>
+      <Icon v-else icon="lucide:download" class="w-4 h-4" />
+      <span>{{ isExporting ? 'Exporting...' : 'Export Asset' }}</span>
+    </button>
         </div>
       </template>
 
@@ -51,6 +59,22 @@
         </div>
       </template>
 
+      <!-- Custom Slot for AMS Link -->
+      <template #cell-amsLink="{ value, item }">
+        <a
+          v-if="value"
+          :href="value"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link link-primary hover:underline font-medium inline-flex items-center gap-1"
+          @click.stop
+        >
+          <span>View AMS</span>
+          <Icon icon="lucide:external-link" class="w-3.5 h-3.5" />
+        </a>
+        <span v-else class="text-base-content/40">-</span>
+      </template>
+
       <!-- Custom Cells for Relational Data -->
       <template #cell-userData.name="{ value }">
         <span class="font-medium text-base-content">{{ value || 'Unassigned' }}</span>
@@ -64,6 +88,9 @@
       <template #actions="{ item }">
         <button @click="openEditModal(item)" class="btn btn-ghost btn-xs text-info" title="Edit">
           <Icon icon="lucide:edit-3" class="w-4 h-4" />
+        </button>
+        <button @click="openViewModal(item)" class="btn btn-ghost btn-xs text-primary" title="View Details">
+          <Icon icon="lucide:eye" class="w-4 h-4" />
         </button>
         <button @click="confirmDelete(item)" class="btn btn-ghost btn-xs text-error" title="Delete">
           <Icon icon="lucide:trash-2" class="w-4 h-4" />
@@ -114,7 +141,7 @@
             <input v-model="form.model" type="text" class="input input-sm input-bordered w-full" />
           </div>
 
-          <!-- Specifications (CPU, RAM, Storage) -->
+          <!-- Specifications -->
           <div>
             <label class="label text-xs font-semibold">CPU</label>
             <input v-model="form.cpu" type="text" class="input input-sm input-bordered w-full" />
@@ -171,6 +198,19 @@
               searchable
             />
           </div>
+          <div>
+            <label class="label text-xs font-semibold">Hand Over</label>
+            <VueDatePicker v-model="form.handoverDate"></VueDatePicker>
+          </div>
+          <div>
+            <label class="label text-xs font-semibold">AMS Link</label>
+            <input
+              v-model="form.amsLink"
+              type="text"
+              class="input input-sm input-bordered w-full"
+              placeholder="AMS Link"
+            />
+          </div>
         </div>
 
         <!-- Remarks -->
@@ -194,6 +234,50 @@
       </form>
     </Modal>
   </div>
+
+  <!-- View Modal Component Implementation -->
+<!-- <ViewModal
+  :is-open="isViewModalOpen"
+  title="Asset Details"
+  :item="selectedViewAsset"
+  :sections="viewSections"
+  header-title-key="assetNumberId"
+  header-subtitle-key="model"
+  @close="closeViewModal"
+>
+  <template #badge="{ item }">
+    <span class="badge badge-primary badge-sm font-medium">
+      {{ item.assetCategoryData?.name || 'Uncategorized' }}
+    </span>
+  </template>
+
+  <template #field-amsLink="{ value }">
+    <a
+      v-if="value"
+      :href="value"
+      target="_blank"
+      class="link link-primary hover:underline font-medium inline-flex items-center gap-1"
+    >
+      <span>View AMS</span>
+      <Icon icon="lucide:external-link" class="w-3.5 h-3.5" />
+    </a>
+    <span v-else class="text-base-content/40">-</span>
+  </template>
+
+  <template #footer-actions="{ item }">
+    <button @click="switchToEditModal" class="btn btn-sm btn-primary gap-1">
+      <Icon icon="lucide:edit-3" class="w-4 h-4" />
+      <span>Edit Asset</span>
+    </button>
+  </template>
+</ViewModal> -->
+
+<!-- Handover A4 Print Modal Implementation -->
+<HandoverPrintModal
+  :is-open="isViewModalOpen"
+  :asset="selectedViewAsset"
+  @close="closeViewModal"
+/>
 </template>
 
 <script setup>
@@ -202,30 +286,101 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import Swal from 'sweetalert2'
 import DataTable from '../components/ui/dataTable.vue'
+import ViewModal from '../components/ui/ViewModal.vue'
+import HandoverPrintModal from '../components/ui/HandoverPrintModal.vue'
 import Modal from '../components/ui/modal.vue'
 import { useAssetStore } from '../stores/assetStore.js'
 import { useSapStore } from '../stores/sapStore.js'
 import { useAssetCategoryStore } from '../stores/assetCategoryStore.js'
 import Multiselect from '@vueform/multiselect'
 import '@vueform/multiselect/themes/default.css'
+import { VueDatePicker } from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
 
 const assetStore = useAssetStore()
 const sapStore = useSapStore()
 const assetCategoryStore = useAssetCategoryStore()
+const isViewModalOpen = ref(false)
+const selectedViewAsset = ref(null)
 
-// --- Table Config ---
+// Define the modal layout sections
+const viewSections = [
+  {
+    title: 'General Information',
+    columnsClass: 'grid-cols-1 sm:grid-cols-2',
+    fields: [
+      { key: 'serialNumber', label: 'Serial Number' },
+      { key: 'userData.name', label: 'Assigned User' },
+      { key: 'handoverDate', label: 'Handover Date', formatter: (row) => formatDate(row.handoverDate) },
+      { key: 'amsLink', label: 'AMS Link' },
+    ],
+  },
+  {
+    title: 'Hardware Specifications',
+    columnsClass: 'grid-cols-2 sm:grid-cols-3',
+    fields: [
+      { key: 'brand', label: 'Brand' },
+      { key: 'model', label: 'Model' },
+      { key: 'os', label: 'OS' },
+      { key: 'cpu', label: 'CPU' },
+      { key: 'gpu', label: 'GPU' },
+      { key: 'ram', label: 'RAM' },
+      { key: 'diskSize', label: 'Disk Size' },
+      { key: 'diskType', label: 'Disk Type' },
+    ],
+  },
+  {
+    title: 'SAP Reference Data',
+    columnsClass: 'grid-cols-1 sm:grid-cols-3',
+    fields: [
+      { key: 'sapData.itemNumber', label: 'SAP Item Code' },
+      { key: 'sapData.name', label: 'SAP Name' },
+      { key: 'sapData.dateBuy', label: 'Purchase Date', formatter: (row) => formatDate(row.sapData?.dateBuy) },
+    ],
+  },
+  {
+    title: 'Remarks',
+    textKey: 'remaks',
+  },
+]
+
+// Modal Control Handlers
+function openViewModal(item) {
+  selectedViewAsset.value = item
+  isViewModalOpen.value = true
+}
+
+function closeViewModal() {
+  isViewModalOpen.value = false
+  selectedViewAsset.value = null
+}
+
+function switchToEditModal() {
+  const target = selectedViewAsset.value
+  closeViewModal()
+  if (target) {
+    openEditModal(target)
+  }
+}
+
 const columns = [
-  { key: 'assetNumberId', label: 'Asset ID', sortable: true },
+  // { key: 'assetNumberId', label: 'Asset ID', sortable: true },
+  { key: 'sapData.itemNumber', label: 'SAP Item Code' },
+  { key: 'sapData.name', label: 'Name'},
+  { key: 'cpu', label: 'CPU'},
+
   { key: 'serialNumber', label: 'Serial No.' },
+  // { key: 'specification', label: 'Specification'},
   { key: 'brand', label: 'Brand' },
   { key: 'model', label: 'Model' },
   { key: 'userData.name', label: 'User' },
-  { key: 'sapData.itemNumber', label: 'SAP Reference' },
+  { key: 'handoverDate', label: 'Hand Over'},
+  { key: 'sapData.dateBuy', label: 'Buy Date', formatter: (row) => formatDate(row.sapData?.dateBuy) },
   { key: 'assetCategoryData.name', label: 'Category' },
+  { key: 'amsLink', label: 'AMS Link' },
   { key: 'remaks', label: 'Remarks' },
 ]
 
-// --- State ---
 const searchQuery = ref('')
 const pageSize = ref(10)
 const selectedIds = ref([])
@@ -236,32 +391,19 @@ const activeAssetId = ref(null)
 const submitting = ref(false)
 
 const dataUser = ref([])
-const userOptions = computed(() => {
-  return (
-    dataUser.value?.map((user) => ({
-      value: user.id,
-      label: user.name,
-    })) || []
-  )
-})
-const categoryOptions = computed(() => {
-  return (
-    assetCategoryStore.categories?.map((cat) => ({
-      value: cat.id,
-      label: cat.name,
-    })) || []
-  )
-})
-const sapOptions = computed(() => {
-  return (
-    sapStore.sapRecords?.map((item) => ({
-      value: item.id,
-      label: `${item.itemNumber} - ${item.name}`,
-    })) || []
-  )
-})
+const userOptions = computed(() =>
+  dataUser.value?.map((user) => ({ value: user.id, label: user.name })) || []
+)
+const categoryOptions = computed(() =>
+  assetCategoryStore.categories?.map((cat) => ({ value: cat.id, label: cat.name })) || []
+)
+const sapOptions = computed(() =>
+  sapStore.sapRecords?.map((item) => ({
+    value: item.id,
+    label: `${item.itemNumber} - ${item.name} - ${formatDate(item.dateBuy)}`,
+  })) || []
+)
 
-// Form state
 const initialFormState = {
   assetNumberId: '',
   serialNumber: '',
@@ -276,6 +418,7 @@ const initialFormState = {
   specification: '',
   remaks: '',
   userId: null,
+  handoverDate: null,
   assetCategoryId: null,
   problemId: null,
   sapId: null,
@@ -284,7 +427,6 @@ const initialFormState = {
 
 const form = reactive({ ...initialFormState })
 
-// --- Lifecycle ---
 onMounted(() => {
   loadData()
   loadSapData()
@@ -308,7 +450,6 @@ async function loadCategoryData() {
   })
 }
 
-// --- Data Fetching ---
 async function loadData() {
   await assetStore.fetchAssets({
     page: assetStore.currentPage,
@@ -335,7 +476,33 @@ function debouncedSearch() {
   }, 300)
 }
 
-// --- Pagination & Table Handlers ---
+// Add state for tracking export loading
+const isExporting = ref(false)
+
+// Handler to download Excel export with active search query filter
+async function handleExport() {
+  isExporting.value = true
+  try {
+    await assetStore.exportAssets({ search: searchQuery.value })
+    Swal.fire({
+      title: 'Exported!',
+      text: 'Assets have been exported successfully.',
+      icon: 'success',
+      timer: 2000,
+      showConfirmButton: false,
+    })
+  } catch (err) {
+    console.error('Export asset failed:', err)
+    Swal.fire({
+      title: 'Export Failed!',
+      text: err.response?.data?.message || 'Failed to export assets to Excel.',
+      icon: 'error',
+    })
+  } finally {
+    isExporting.value = false
+  }
+}
+
 function handlePageChange(newPage) {
   assetStore.currentPage = newPage
   loadData()
@@ -356,11 +523,7 @@ function handleToggleSelect(item, checked) {
 }
 
 function handleToggleSelectAll(checked) {
-  if (checked) {
-    selectedIds.value = assetStore.assets.map((item) => item.id)
-  } else {
-    selectedIds.value = []
-  }
+  selectedIds.value = checked ? assetStore.assets.map((item) => item.id) : []
 }
 
 async function handleBulkDelete() {
@@ -398,7 +561,6 @@ async function handleBulkDelete() {
   }
 }
 
-// --- Modal & CRUD Handlers ---
 function openCreateModal() {
   isEditMode.value = false
   activeAssetId.value = null
@@ -423,6 +585,7 @@ function openEditModal(item) {
     specification: item.specification || '',
     remaks: item.remaks || '',
     userId: item.userId || null,
+    handoverDate: item.handoverDate || null,
     assetCategoryId: item.assetCategoryId || null,
     problemId: item.problemId || null,
     sapId: item.sapId || null,
@@ -501,14 +664,10 @@ async function confirmDelete(item) {
   }
 }
 
-/**
- * Handles uploading and auto-filling form from JSON file
- */
 function handleJsonUpload(event) {
   const file = event.target.files[0]
   if (!file) return
 
-  // Verify file type
   if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
     Swal.fire({
       title: 'Invalid File',
@@ -523,11 +682,8 @@ function handleJsonUpload(event) {
   reader.onload = (e) => {
     try {
       const parsedData = JSON.parse(e.target.result)
-
-      // 1. Reset form to initial clean state
       Object.assign(form, initialFormState)
 
-      // 2. Map JSON keys to your Asset form schema
       form.serialNumber = parsedData.SerialNumber || ''
       form.os = parsedData.OS || ''
       form.ram = parsedData.RAM_GB ? `${parsedData.RAM_GB} GB` : ''
@@ -549,15 +705,13 @@ function handleJsonUpload(event) {
           GPU: parsedData.GPU || '',
         },
         null,
-        2,
+        2
       )
 
-      // Auto generate Asset Number ID if empty
       if (!form.assetNumberId && parsedData.Model) {
         form.assetNumberId = `PSS-${parsedData.Model}-${parsedData.SerialNumber}`
       }
 
-      // 3. Open Modal with pre-populated fields
       isEditMode.value = false
       activeAssetId.value = null
       isModalOpen.value = true
@@ -583,41 +737,35 @@ function handleJsonUpload(event) {
 
   reader.readAsText(file)
 }
+
+const formatDate = (dateInput) => {
+  if (!dateInput) return '-'
+  const date = new Date(dateInput)
+  if (isNaN(date.getTime())) return dateInput
+
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+
+  return `${day}/${month}/${year}`
+}
 </script>
 
 <style scoped>
-/* Clean & Native Overrides for @vueform/multiselect in Tailwind style */
-
-/* 1. Base Input Customization */
 :deep(.multiselect) {
-  --ms-bg: #928d8d;
+  --ms-bg: transparent;
   --ms-border-color: #d1d5db;
-  --ms-radius: 0.5rem; /* rounded-lg */
+  --ms-radius: 0.5rem;
   --ms-ring-color: #3b82f6;
   --ms-ring-width: 2px;
 }
 
-:deep(.multiselect-search) {
-  --ms-bg: #ffffff;
-  --ms-border-color: #d1d5db;
-  --ms-radius: 0.5rem; /* rounded-lg */
-  --ms-ring-color: #3b82f6;
-  --ms-ring-width: 2px;
-}
-
-/* Dark Mode support for Multiselect */
 .dark :deep(.multiselect) {
-  --ms-bg: #1f2937; /* gray-800 */
-  --ms-border-color: #4b5563; /* gray-600 */
+  --ms-bg: transparent;
+  --ms-border-color: #4b5563;
   --ms-ring-color: #60a5fa;
 }
 
-/* 2. Text styling */
-:deep(.multiselect-placeholder) {
-  color: #9ca3af !important; /* gray-400 */
-}
-
-/* 3. Dropdown list container background */
 :deep(.multiselect-dropdown) {
   background-color: #ffffff !important;
   border-color: #e5e7eb !important;
@@ -626,26 +774,17 @@ function handleJsonUpload(event) {
 }
 
 .dark :deep(.multiselect-dropdown) {
-  background-color: #111827 !important; /* gray-900 */
-  border-color: #374151 !important; /* gray-700 */
-}
-
-/* 4. Individual List Options hovering/selection */
-:deep(.multiselect-option) {
-  color: #374151 !important;
-}
-
-.dark :deep(.multiselect-option) {
-  color: #e5e7eb !important;
+  background-color: #111827 !important;
+  border-color: #374151 !important;
 }
 
 :deep(.multiselect-option.is-pointed) {
-  background-color: #3b82f6 !important; /* Blue-500 */
+  background-color: #3b82f6 !important;
   color: #ffffff !important;
 }
 
 :deep(.multiselect-option.is-selected) {
-  background-color: #2563eb !important; /* Blue-600 */
+  background-color: #2563eb !important;
   color: #ffffff !important;
 }
 </style>

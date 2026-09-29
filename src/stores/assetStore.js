@@ -140,6 +140,51 @@ export const useAssetStore = defineStore('asset', () => {
     }
   }
 
+  /**
+   * Export assets to Excel with optional search filter
+   * @param {Object} params - { search }
+   */
+  const exportAssets = async (params = {}) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await axiosInstance.get('/assets/export', {
+        params,
+        responseType: 'blob', // Crucial for handling binary data
+      })
+
+      // Extract filename from Content-Disposition header if provided by server
+      let filename = 'Asset_Export.xlsx'
+      const contentDisposition = response.headers['content-disposition']
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/)
+        if (match && match[1]) {
+          filename = match[1]
+        }
+      }
+
+      // Create a blob URL and trigger browser download
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+
+      // Cleanup DOM and Blob memory
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message || 'Failed to export assets'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // State
     assets,
@@ -150,6 +195,7 @@ export const useAssetStore = defineStore('asset', () => {
     totalPages,
     currentPage,
     // Actions
+    exportAssets,
     fetchAssets,
     fetchAssetById,
     createAsset,

@@ -10,6 +10,7 @@ import RoleView from '@/views/RoleView.vue'
 import CategoryView from '@/views/CategoryView.vue'
 import AssetView from '@/views/AssetView.vue'
 import AssetCategoryView from '@/views/AssetCategoryView.vue'
+import SAPView from '@/views/SAPView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -78,6 +79,12 @@ const router = createRouter({
       name: 'asset-categories',
       meta: { requiresAuth: true },
       component: AssetCategoryView,
+    },
+    {
+      path: '/sap',
+      name: 'sap',
+      meta: {requiresAuth: true},
+      component: SAPView,
     },
   ],
 })

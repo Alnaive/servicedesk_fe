@@ -2,3 +2,17 @@
 @plugin "daisyui" {
   themes: all;
 }
+/* Global Print Styles - Add to main CSS or App.vue */
+@media print {
+  /* Completely hide main application wrapper when modal is open */
+  body > div:not(.print-container),
+  #app > *:not(.modal) {
+    display: none !important;
+  }
+
+  /* Force background colors to print correctly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
